@@ -37,4 +37,4 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             pkill -f java || true
-            nohup java -jar /home/ubuntu/*.jar > app.log 2>&1 &
+            nohup java -jar /home/ubuntu/target/*.jar > app.log 2>&1 &
