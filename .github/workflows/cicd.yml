@@ -22,3 +22,9 @@ jobs:
 
       - name: Create JAR
         run: jar cfe Hello.jar Hello Hello.class
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-jar
+          path: Hello.jar
