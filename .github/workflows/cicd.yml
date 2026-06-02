@@ -1,4 +1,4 @@
-name: Maven Build
+name: Java CI/CD
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,11 +17,24 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Build with Maven
+      - name: Build JAR
         run: mvn clean package
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Copy JAR to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          name: java-jar
-          path: target/*.jar
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "target/*.jar"
+          target: "/home/ubuntu"
+
+      - name: Deploy Application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            pkill -f java || true
+            nohup java -jar /home/ubuntu/*.jar > app.log 2>&1 &
